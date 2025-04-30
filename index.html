@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema de Biblioteca</title>
+    <link 
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
+        rel="stylesheet" 
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
+        crossorigin="anonymous">
+    <link rel="stylesheet" 
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" 
+        integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" 
+        crossorigin="anonymous">
+    
+    <link rel="stylesheet" 
+        href="css/style.css">
+</head>
+
+<body>
+    <!-- Toast para notificaciones -->
+    <div class="toast-container">
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true"
+            data-bs-delay="3000" id="notificationToast">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Sistema Biblioteca</strong>
+                <small>Ahora</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Operación realizada con éxito.
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo registro -->
+    <div class="modal fade" id="modalNuevo" tabindex="-1" aria-labelledby="modalNuevoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevoLabel">Nuevo registro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tipoRegistro" class="form-label">Tipo de registro:</label>
+                        <select class="form-select" id="tipoRegistro">
+                            <option value="libro">Libro</option>
+                            <option value="autor">Autor</option>
+                            <option value="editorial">Editorial</option>
+                        </select>
+                    </div>
+                    <div id="formularioNuevo">
+                        <!-- El formulario cambiará según el tipo seleccionado -->
+                        <div class="mb-3">
+                            <label for="nuevoNombre" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nuevoNombre">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarNuevo">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para préstamo -->
+    <div class="modal fade" id="modalPrestamo" tabindex="-1" aria-labelledby="modalPrestamoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPrestamoLabel">Registrar préstamo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formPrestamo">
+                        <div class="mb-3">
+                            <label for="libroSeleccionado" class="form-label">Libro:</label>
+                            <input type="text" class="form-control" id="libroSeleccionado"
+                                value="Las aventuras de Tom Sawyer" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prestadoA" class="form-label">Prestado a:</label>
+                            <input type="text" class="form-control" id="prestadoA" placeholder="Nombre del lector">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="fechaPrestamo" class="form-label">Fecha préstamo:</label>
+                                <input type="date" class="form-control" id="fechaPrestamo">
+                            </div>
+                            <div class="col">
+                                <label for="fechaDevolucion" class="form-label">Fecha devolución:</label>
+                                <input type="date" class="form-control" id="fechaDevolucion">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="observaciones" class="form-label">Observaciones:</label>
+                            <textarea class="form-control" id="observaciones" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnRegistrarPrestamo">Registrar préstamo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para confirmar eliminación -->
+    <div class="modal fade" id="modalConfirmarEliminar" tabindex="-1" aria-labelledby="modalConfirmarEliminarLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalConfirmarEliminarLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro que desea eliminar este elemento?</p>
+                    <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container app-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h4 class="app-title"><i class="bi bi-book"></i> Sistema de Biblioteca</h4>
+        </div>
+
+        <div class="row m-0">
+            <!-- Columna Izquierda -->
+            <div class="col-md-3 p-4 border-end">
+                <!-- Buscador -->
+                <div class="search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control" placeholder="Buscar..." id="searchInput">
+                </div>
+
+                <!-- Botones de sección -->
+                <div class="btn-group-vertical w-100 mb-3" role="group">
+                    <button type="button" class="btn btn-outline-primary" id="btnAutores">
+                        <i class="bi bi-person"></i> Autores
+                    </button>
+                    <button type="button" class="btn btn-outline-primary active" id="btnLibros">
+                        <i class="bi bi-book"></i> Libros
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btnEditoriales">
+                        <i class="bi bi-building"></i> Editoriales
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="btnPrestamos">
+                        <i class="bi bi-arrow-left-right"></i> Préstamos
+                    </button>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success w-50 me-1" id="btnNuevo" data-bs-toggle="modal"
+                        data-bs-target="#modalNuevo">
+                        <i class="bi bi-plus-lg"></i> Nuevo
+                    </button>
+                    <button class="btn btn-danger w-50" id="btnBorrar" data-bs-toggle="modal"data-bs-target="#modalConfirmarEliminar">
+                        <i class="bi bi-trash"></i> Borrar
+                    </button>
+                </div>
+
+                <!-- Lista con elementos -->
+                <div class="scroll-box mb-3" id="itemsList">
+                    <!-- Libros -->
+                    <div class="list-items-container" id="librosItems">
+                        <div class="list-item active" data-id="1" onclick="selectItem(this)">La casa de los espíritus
+                        </div>
+                        <div class="list-item" data-id="2" onclick="selectItem(this)">El conde Drácula</div>
+                        <div class="list-item" data-id="3" onclick="selectItem(this)">Las aventuras de Tom Sawyer</div>
+                        <div class="list-item" data-id="4" onclick="selectItem(this)">Alicia en el país de las
+                            maravillas</div>
+                        <div class="list-item" data-id="5" onclick="selectItem(this)">Cien años de soledad</div>
+                        <div class="list-item" data-id="6" onclick="selectItem(this)">El Señor de los Anillos</div>
+                        <div class="list-item" data-id="7" onclick="selectItem(this)">Don Quijote de la Mancha</div>
+                        <div class="list-item" data-id="8" onclick="selectItem(this)">1984</div>
+                    </div>
+
+                    <!-- Autores (oculto por defecto) -->
+                    <div class="list-items-container" id="autoresItems" style="display: none;">
+                        <div class="list-item" data-id="1" onclick="selectItem(this)">Isabel Allende</div>
+                        <div class="list-item" data-id="2" onclick="selectItem(this)">Bram Stoker</div>
+                        <div class="list-item" data-id="3" onclick="selectItem(this)">Mark Twain</div>
+                        <div class="list-item" data-id="4" onclick="selectItem(this)">Lewis Carroll</div>
+                        <div class="list-item" data-id="5" onclick="selectItem(this)">Gabriel García Márquez</div>
+                        <div class="list-item" data-id="6" onclick="selectItem(this)">J.R.R. Tolkien</div>
+                        <div class="list-item" data-id="7" onclick="selectItem(this)">Miguel de Cervantes</div>
+                        <div class="list-item" data-id="8" onclick="selectItem(this)">George Orwell</div>
+                    </div>
+
+                    <!-- Editoriales (oculto por defecto) -->
+                    <div class="list-items-container" id="editorialesItems" style="display: none;">
+                        <div class="list-item" data-id="1" onclick="selectItem(this)">Editorial Planeta</div>
+                        <div class="list-item" data-id="2" onclick="selectItem(this)">Alfaguara</div>
+                        <div class="list-item" data-id="3" onclick="selectItem(this)">Norma</div>
+                        <div class="list-item" data-id="4" onclick="selectItem(this)">Penguin Random House</div>
+                        <div class="list-item" data-id="5" onclick="selectItem(this)">Anagrama</div>
+                    </div>
+
+                    <!-- Préstamos (oculto por defecto) -->
+                    <div class="list-items-container" id="prestamosItems" style="display: none;">
+                        <div class="list-item" data-id="1" onclick="selectItem(this)">Cien años de soledad - Ana
+                            Rodríguez</div>
+                        <div class="list-item" data-id="2" onclick="selectItem(this)">1984 - Carlos Méndez</div>
+                        <div class="list-item" data-id="3" onclick="selectItem(this)">El conde Drácula - María Gómez
+                        </div>
+                        <div class="list-item" data-id="4" onclick="selectItem(this)">Don Quijote - Pedro Ramírez</div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="card mb-3">
+                    <div class="card-body p-3">
+                        <h6 class="card-title text-muted mb-3"><i class="bi bi-bar-chart-line"></i> Estadísticas</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <small>Libros catalogados:</small>
+                            <span class="badge bg-primary">143</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <small>Préstamos activos:</small>
+                            <span class="badge bg-warning text-dark">27</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>Autores registrados:</small>
+                            <span class="badge bg-info text-dark">52</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acordeón de filtros -->
+                <div class="accordion" id="accordionFiltros">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                                <i class="bi bi-funnel me-2"></i> Filtros
+                            </button>
+                        </h2>
+                        <div id="collapseFilters" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionFiltros">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Categoría:</label>
+                                    <select class="form-select form-select-sm">
+                                        <option value="">Todas</option>
+                                        <option>Aventura</option>
+                                        <option>Novela</option>
+                                        <option>Clásico</option>
+                                        <option>Ciencia ficción</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Estado:</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="checkDisponible"
+                                            checked>
+                                        <label class="form-check-label" for="checkDisponible">
+                                            Disponible
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="checkPrestado"
+                                            checked>
+                                        <label class="form-check-label" for="checkPrestado">
+                                            Prestado
+                                        </label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary w-100">Aplicar filtros</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha -->
+            <div class="col-md-9 p-4">
+                <!-- Pestañas -->
+                <ul class="nav nav-tabs mb-3" id="tabsContenido" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="autor-tab" data-bs-toggle="tab" data-bs-target="#autor"
+                            type="button" role="tab">
+                            <i class="bi bi-person"></i> Autor
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="libro-tab" data-bs-toggle="tab" data-bs-target="#libro"
+                            type="button" role="tab">
+                            <i class="bi bi-book"></i> Libro
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="editorial-tab" data-bs-toggle="tab" data-bs-target="#editorial"
+                            type="button" role="tab">
+                            <i class="bi bi-building"></i> Editorial
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="prestamos-tab" data-bs-toggle="tab" data-bs-target="#prestamos"
+                            type="button" role="tab">
+                            <i class="bi bi-arrow-left-right"></i> Préstamos
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="tabsContent">
+                    <!-- TAB AUTOR -->
+                    <div class="tab-pane fade" id="autor" role="tabpanel">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            style="width: 100px; height: 100px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            <i class="bi bi-person" style="font-size: 2rem; color: #aaa;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="card-title mb-1">Información del Autor</h5>
+                                        <p class="text-muted mb-0"><small>Actualizado: 10 abril, 2025</small></p>
+                                    </div>
+                                </div>
+
+                                <form id="formAutor">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="autorNombre">Nombre:</label>
+                                            <input type="text" class="form-control" id="autorNombre" value="Mark Twain">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="autorNacimiento">Fecha de nacimiento:</label>
+                                            <input type="date" class="form-control" id="autorNacimiento"
+                                                value="1835-11-30">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="autorNacionalidad">Nacionalidad:</label>
+                                            <input type="text" class="form-control" id="autorNacionalidad"
+                                                value="Estadounidense">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="autorFallecimiento">Fecha de
+                                                fallecimiento:</label>
+                                            <input type="date" class="form-control" id="autorFallecimiento"
+                                                value="1910-04-21">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="autorBiografia">Biografía:</label>
+                                        <textarea class="form-control" id="autorBiografia"
+                                            rows="4">Samuel Langhorne Clemens, conocido por su seudónimo Mark Twain, fue un escritor, orador y humorista estadounidense. Escribió obras como Las aventuras"</textarea>
+                                        <div class="list-item" data-id="5" onclick="selectItem(this)">Gabriel García
+                                            Márquez</div>
+                                        <div class="list-item" data-id="6" onclick="selectItem(this)">J.R.R. Tolkien
+                                        </div>
+                                        <div class="list-item" data-id="7" onclick="selectItem(this)">Miguel de
+                                            Cervantes</div>
+                                        <div class="list-item" data-id="8" onclick="selectItem(this)">George Orwell
+                                        </div>
+                                    </div>
+
+                                    <!-- Editoriales (oculto por defecto) -->
+                                    <div class="list-items-container" id="editorialesItems" style="display: none;">
+                                        <div class="list-item" data-id="1" onclick="selectItem(this)">Editorial Planeta
+                                        </div>
+                                        <div class="list-item" data-id="2" onclick="selectItem(this)">Penguin Random
+                                            House</div>
+                                        <div class="list-item" data-id="3" onclick="selectItem(this)">HarperCollins
+                                        </div>
+                                        <div class="list-item" data-id="4" onclick="selectItem(this)">Santillana</div>
+                                        <div class="list-item" data-id="5" onclick="selectItem(this)">Alfaguara</div>
+                                        <div class="list-item" data-id="6" onclick="selectItem(this)">Anagrama</div>
+                                    </div>
+
+                                    <!-- Préstamos (oculto por defecto) -->
+                                    <div class="list-items-container" id="prestamosItems" style="display: none;">
+                                        <div class="list-item" data-id="1" onclick="selectItem(this)">Tom Sawyer - Juan
+                                            Pérez</div>
+                                        <div class="list-item" data-id="2" onclick="selectItem(this)">1984 - Ana Ramírez
+                                        </div>
+                                        <div class="list-item" data-id="3" onclick="selectItem(this)">El Señor de los
+                                            Anillos - Pedro Jiménez</div>
+                                    </div>
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Contenido Detallado -->
+                        <div class="col-md-9 p-4" id="detalleContenido">
+                            <!-- Contenido cargado dinámicamente según selección -->
+                            <div class="alert alert-info">Seleccione un elemento para ver detalles.</div>
+                        </div>
+                    </div>
+                    <!-- TAB LIBRO -->
+                    <div class="tab-pane fade show active" id="libro" role="tabpanel">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            style="width: 100px; height: 100px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            <i class="bi bi-book" style="font-size: 2rem; color: #aaa;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="card-title mb-1">Información del Libro</h5>
+                                        <p class="text-muted mb-0"><small>Actualizado: 10 abril, 2025</small></p>
+                                    </div>
+                                </div>
+
+                                <form id="formLibro">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="libroTitulo">Título:</label>
+                                            <input type="text" class="form-control" id="libroTitulo"
+                                                value="Las aventuras de Tom Sawyer">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="libroAutor">Autor:</label>
+                                            <input type="text" class="form-control" id="libroAutor" value="Mark Twain">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="libroEditorial">Editorial:</label>
+                                            <input type="text" class="form-control" id="libroEditorial"
+                                                value="Anagrama">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="libroFecha">Fecha de publicación:</label>
+                                            <input type="date" class="form-control" id="libroFecha" value="1876-06-01">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="libroResumen">Resumen:</label>
+                                        <textarea class="form-control" id="libroResumen"
+                                            rows="4">Una novela juvenil que narra las travesuras y aventuras de Tom Sawyer a orillas del río Mississippi.</textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB EDITORIAL -->
+                    <div class="tab-pane fade" id="editorial" role="tabpanel">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            style="width: 100px; height: 100px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            <i class="bi bi-building" style="font-size: 2rem; color: #aaa;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="card-title mb-1">Información de la Editorial</h5>
+                                        <p class="text-muted mb-0"><small>Actualizado: 10 abril, 2025</small></p>
+                                    </div>
+                                </div>
+
+                                <form id="formEditorial">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="editorialNombre">Nombre:</label>
+                                            <input type="text" class="form-control" id="editorialNombre"
+                                                value="Anagrama">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="editorialFundacion">Año de fundación:</label>
+                                            <input type="number" class="form-control" id="editorialFundacion"
+                                                value="1969">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="editorialDescripcion">Descripción:</label>
+                                        <textarea class="form-control" id="editorialDescripcion"
+                                            rows="4">Editorial reconocida por publicar obras literarias de calidad, tanto en lengua española como traducidas.</textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB PRÉSTAMOS -->
+                    <div class="tab-pane fade" id="prestamos" role="tabpanel">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            style="width: 100px; height: 100px; background-color: #eee; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                                            <i class="bi bi-arrow-left-right" style="font-size: 2rem; color: #aaa;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="card-title mb-1">Información de Préstamos</h5>
+                                        <p class="text-muted mb-0"><small>Actualizado: 10 abril, 2025</small></p>
+                                    </div>
+                                </div>
+
+                                <form id="formPrestamos">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="prestamoLibro">Libro:</label>
+                                            <input type="text" class="form-control" id="prestamoLibro"
+                                                value="Las aventuras de Tom Sawyer">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="prestamoUsuario">Usuario:</label>
+                                            <input type="text" class="form-control" id="prestamoUsuario"
+                                                value="Juan Pérez">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="prestamoInicio">Fecha de préstamo:</label>
+                                            <input type="date" class="form-control" id="prestamoInicio"
+                                                value="2025-04-01">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="prestamoDevolucion">Fecha de
+                                                devolución:</label>
+                                            <input type="date" class="form-control" id="prestamoDevolucion"
+                                                value="2025-04-15">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label" for="prestamoEstado">Estado:</label>
+                                        <select class="form-select" id="prestamoEstado">
+                                            <option selected>Devuelto</option>
+                                            <option>En curso</option>
+                                            <option>Atrasado</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Scripts Bootstrap y personalizados -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" 
+    crossorigin="anonymous"></script>
+</body>
